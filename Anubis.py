@@ -260,6 +260,7 @@ class UI(QMainWindow):
         filemenu = menu.addMenu('File')
         Port = menu.addMenu('Port')
         Run = menu.addMenu('Run')
+        ExecuteFast = menu.addMenu('Execute Fast')
 
         # As any PC or laptop have many ports, so I need to list them to the User
         # so I made (Port_Action) to add the Ports got from (serial_ports()) function
@@ -299,6 +300,10 @@ class UI(QMainWindow):
         filemenu.addAction(Close_Action)
         filemenu.addAction(Open_Action)
 
+        # Added Functionality
+        ExecuteFastAction = QAction("ExecuteFast", self)
+        ExecuteFastAction.triggered.connect(self.Execute)
+        ExecuteFast.addAction(ExecuteFastAction)
 
         # Seting the window Geometry
         self.setGeometry(200, 150, 600, 500)
@@ -325,6 +330,34 @@ class UI(QMainWindow):
         else:
             text2.append("Please Select Your Port Number First")
 
+    # Additional function
+    def Execute(self):
+        textFun = text.toPlainText()
+        if exec(textFun) is None:
+            text2.append("The function has executed properly in exec.")
+        linesFun = textFun.splitlines()
+        for line in linesFun:
+            if "def" in line:
+                leftParenthesisIndex = line.find("(") + 1
+                rightParenthesisIndex = line.find(")")
+                lineEdit = line[leftParenthesisIndex:rightParenthesisIndex]
+                lineEdit = lineEdit.replace(" ", "")
+                listParams = lineEdit.split(",")
+                nameIndexFLetter = line.find("def") + 4
+                nameIndexLLetter = line.find("(")
+                function_call_string = "Output = " + line[nameIndexFLetter:nameIndexLLetter] + "("
+                if listParams[0] != '':
+                    inputParamsStr, pressOk = QInputDialog.getText(self, "Parameters List",
+                                                                               "Enter parameters separated by colons")
+                    if pressOk and inputParamsStr != '':
+                        inputParams = inputParamsStr.split(",")
+                    for param in inputParams:
+                        callFunString = callFunString + param + ","
+                    callFunString = callFunString[:-1]
+                callFunString = callFunString + ")"
+                exec(callFunString)
+                exec("text2.append('The Returned Object is: ')")
+                exec("text2.append(str(Output))")
 
     # this function is made to get which port was selected by the user
     @QtCore.pyqtSlot()
